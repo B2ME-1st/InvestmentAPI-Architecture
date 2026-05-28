@@ -1,76 +1,179 @@
-# Investment Order Microservice – System Design
+# Investment Order Microservice – Reliability & Deployment Design
 
 ## Overview
-This document describes the architecture and reliability design for a critical microservice responsible for processing investment orders in a high-availability fintech environment.
+This document outlines the deployment architecture and reliability design for a critical microservice responsible for processing investment orders in a high-availability fintech environment.
 
-The system is designed with a strong focus on reliability, scalability, observability, and fault tolerance.
+The design focuses on scalability, reliability, fault tolerance, and operational visibility to ensure stable transaction processing during both normal and peak trading periods.
 
-> See `architecture.png` for the system architecture diagram.
+### Assumptions
+For the purpose of this design, the following assumptions are made:
 
----
-
-## System Design
-[Placeholder: Describe overall architecture, components, and how requests flow through the system]
-
-- Clients / API Gateway
-- Application Layer (Microservice)
-- Database Layer
-- Cache Layer
-- Load Balancing
-- External integrations (if any)
+1. The service will initially support only Nigerian residents.
+2. The platform is expected to experience periodic spikes in investment requests, especially during stock market opening hours on weekdays.
+3. NDPR regulations permit the hosting of investment-related data on AWS cloud infrastructure.
 
 ---
 
-## SLOs (Service Level Objectives)
-[Placeholder: Define reliability targets]
+## Request Flow Diagram
+> See the image below for the request flow diagram.
 
-- Availability: [e.g. 99.95%]
-- Latency: [e.g. 95% of requests < X ms]
-- Error Rate: [e.g. < 0.1% failed transactions]
-- Data Integrity: [e.g. no lost or duplicated orders]
+### Request Lifecycle
 
----
+1. Users: Clients or frontend applications initiate the trade by submitting an investment order payload via a secure HTTPS request.
 
-## Deployment Strategy
-[Placeholder: Describe how the service is deployed]
+2. API GW (API Gateway): Acts as the entry gate to authenticate the request, enforce rate limits, and safely route the traffic into the private network.
 
-- Deployment model (e.g. blue-green / canary / rolling updates)
-- CI/CD pipeline overview
-- Rollback strategy
-- Versioning strategy
+3. Lambda Ingress: A highly scalable, serverless function that performs rapid validation, hands off the order id checking, and offloads the request instantly.
 
----
+4. Redis (Idempotency): Intercepts the request inside Lambda to verify the unique idempotency key, immediately blocking duplicate submissions to prevent double-ordering. Successful order ids rreturn a 200 to the user.
 
-## Failover Strategy
-[Placeholder: How system handles failures]
+5. Apache Kafka (Multi-AZ): Acts as an immutable, highly available shock absorber that durably saves the "Order Placed" event across multiple zones without risk of data loss.
 
-- Multi-AZ / redundancy design
-- Service recovery mechanisms
-- Dependency failover (DB, cache, external services)
-- Retry and fallback strategies
+6. ECS Fargate Workers: A steady-state container fleet that pulls messages from Kafka at a regulated pace to safely execute core investment and clearing business logic.
+
+7. Aurora PostgreSQL: The final, ACID-compliant relational database where the transaction is securely and permanently recorded with strict data integrity.
 
 ---
 
-## Backup Strategy
-[Placeholder: Data protection approach]
+## System Design (Architecture)
+To guarantee zero data loss and continuous availability for a high-volume stock exchange model in Nigeria, this architecture decouples synchronous API ingestion from asynchronous order execution using a message broker.
 
-- Database backup approach (frequency, type)
-- Recovery Point Objective (RPO)
-- Recovery Time Objective (RTO)
-- Disaster recovery approach
+> See architecture.png for the full architecture diagram.
+
+### Infrastructure Components
+[Placeholder]
+
+Describe:
+- Compute layer
+- Networking
+- Load balancing
+- Database layer
+- Cache layer
+- Observability stack
+- Backup systems
+- CI/CD integration
 
 ---
 
-## Observability
-[Placeholder: Monitoring and visibility setup]
+## Design Justification
 
-- Metrics (Prometheus)
-- Dashboards (Grafana)
-- Logging (Loki or equivalent)
-- Alerting strategy
-- Key indicators monitored (latency, errors, saturation)
+### Compute Design
+[Placeholder]
+
+Explain:
+- Choice of compute platform
+- Scaling approach
+- High availability considerations
+- Container orchestration decisions
 
 ---
 
-## Notes
-This system is designed for high availability and financial-grade reliability, where correctness, consistency, and traceability of transactions are critical.
+### Database Design
+[Placeholder]
+
+Explain:
+- Database choice
+- Replication strategy
+- Read/write considerations
+- Connection management
+- Data durability considerations
+
+---
+
+### Failover Strategy
+[Placeholder]
+
+Explain:
+- Multi-AZ deployment
+- Automatic failover approach
+- Recovery expectations
+- Service redundancy
+- Disaster recovery considerations
+
+---
+
+### Backup & Recovery Strategy
+[Placeholder]
+
+Explain:
+- Backup frequency
+- Snapshot strategy
+- Retention policy
+- RPO/RTO targets
+- Restore testing approach
+
+---
+
+## Service Level Objectives (SLOs)
+
+### Availability SLO
+[Placeholder]
+
+---
+
+### Latency SLO
+[Placeholder]
+
+---
+
+### Error Rate SLO
+[Placeholder]
+
+---
+
+### Data Integrity SLO
+[Placeholder]
+
+---
+
+## Observability & Alerting
+
+### Metrics & Monitoring
+[Placeholder]
+
+Describe:
+- Prometheus metrics collection
+- RED/USE metrics
+- Infrastructure metrics
+- Database metrics
+
+---
+
+### Dashboards
+[Placeholder]
+
+Describe:
+- Grafana dashboards
+- Business metrics
+- Infrastructure health views
+- Incident visibility dashboards
+
+---
+
+### Alerting Strategy
+[Placeholder]
+
+Describe:
+- Prometheus alert rules
+- Alert severity levels
+- Escalation flow
+- On-call considerations
+
+---
+
+## Reliability Considerations
+[Placeholder]
+
+Describe:
+- Single points of failure eliminated
+- Scaling bottlenecks
+- Traffic surge handling
+- Operational risks
+- Future improvements
+
+---
+
+## Conclusion
+[Placeholder]
+
+Summarize the reliability, scalability, and operational goals of the architecture.
