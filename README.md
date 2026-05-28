@@ -17,6 +17,9 @@ For the purpose of this design, the following assumptions are made:
 ## Request Flow Diagram
 > See the image below for the request flow diagram.
 
+ <img width="1082" height="489" alt="FLOW" src="https://github.com/user-attachments/assets/c974399d-91b1-4a57-8d92-569ffdb1f188" />
+
+
 ### Request Lifecycle
 
 1. Users: Clients or frontend applications initiate the trade by submitting an investment order payload via a secure HTTPS request.
