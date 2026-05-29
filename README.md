@@ -91,7 +91,7 @@ All critical infrastructure components—including ECS Fargate compute, Apache K
 - **Database (Aurora):** You run an Aurora cluster with 1 Writer instance in AZ-A and 2 Read Replicas (one in AZ-B, one in AZ-C).
 Failover: If AZ-A dies, Aurora automatically promotes one of the read replicas to become the primary Writer in under 30 seconds. Your application layer handles this seamlessly using the Aurora cluster endpoint.
 - **Queue (Kafka):** Kafka’s replication factor of 3 ensures that if a broker fails, a new partition leader is elected from a healthy AZ, maintaining message durability and availability.
-- **Redis: ** Deploy AWS ElastiCache Redis in Cluster Mode across 3 AZs with automatic failover enabled.
+- **Redis:** Deploy AWS ElastiCache Redis in Cluster Mode across 3 AZs with automatic failover enabled.
 
 ### Recovery Expectations
 - **Application Ingress:** Instantaneous traffic rerouting (0 seconds).
