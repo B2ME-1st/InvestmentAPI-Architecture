@@ -140,8 +140,9 @@ To survive a total AWS regional outage, an Aurora Global Database asynchronously
 
 For investments, **data correctness and consistency** (ACID compliance) trump raw speed. An investor is far more concerned that their ₦20 million investment order is processed accurately and consistently than whether the request completed in 300ms instead of 900ms.
 
-> Else, you go explain tire (in court)
-> That being said, these are the 2 choices for my SLOs for this service and why;
+> Else, you go explain tire (in court).
+
+That being said, these are the 2 choices for my SLOs for this service and why;
 
 ### 1. Order Durability (99.999%)
 
