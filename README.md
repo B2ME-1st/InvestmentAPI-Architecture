@@ -41,7 +41,10 @@ For the purpose of this design, the following assumptions are made:
 ## System Design (Architecture)
 To guarantee zero data loss and continuous availability for a high-volume stock exchange model in Nigeria, this architecture decouples synchronous API ingestion from asynchronous order execution using a message broker.
 
-> See architecture.png for the full architecture diagram.
+> See image below for the full architecture diagram.
+
+<img width="1637" height="977" alt="archi drawio" src="https://github.com/user-attachments/assets/5a9dd5d6-01db-4a27-b06e-8cc60511bb55" />
+
 
 ### Infrastructure Components
 [Placeholder]
