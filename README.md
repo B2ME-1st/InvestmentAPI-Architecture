@@ -158,19 +158,21 @@ We guarantee our doors are always open to accept your trade (**Availability**), 
 
 ---
 
-## Reliability Considerations
-[Placeholder]
+## Reliability Considerations & Trade-offs
 
-Describe:
-- Single points of failure eliminated
-- Scaling bottlenecks
-- Traffic surge handling
-- Operational risks
-- Future improvements
+1. **Consistency vs. Latency:**  
+     - Prioritize data correctness over ultra-fast responses. Synchronous replication adds minor delays but prevents order loss or duplication.
+
+2. **Operational Complexity vs. Resilience:**  
+     - Multi-layered system (Lambda, Redis, Kafka, Fargate) increases complexity but ensures resilience and continuous order acceptance.
+
+3. **Idle Cloud Cost vs. High Availability:**  
+     - Higher AWS costs due to multi-AZ deployments are justified by the need for continuous uptime and automatic failover.
+
 
 ---
 
 ## Conclusion
-[Placeholder]
+This design aims to provide a reliable, scalable, and observable foundation for handling critical investment transactions while maintaining strong operational resilience during peak usage periods.
 
-Summarize the reliability, scalability, and operational goals of the architecture.
+*I hope you enjoyed reading through this document as much as I enjoyed designing and thinking through the reliability considerations behind it.*
