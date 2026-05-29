@@ -138,8 +138,10 @@ To survive a total AWS regional outage, an Aurora Global Database asynchronously
 
 ## Service Level Objectives
 
-For investments, **data correctness and consistency** (ACID compliance) trump raw speed. If a social media feed drops a post, it's fine; if an investment API drops a 20M Naira stock buy or duplicates it, _it's catastrophic_.
-> Summary: You go explain tire (in court)
+For investments, **data correctness and consistency** (ACID compliance) trump raw speed. An investor is far more concerned that their ₦20 million investment order is processed accurately and consistently than whether the request completed in 300ms instead of 900ms.
+
+> Else, you go explain tire (in court)
+> That being said, these are the 2 choices for my SLOs for this service and why;
 
 ### 1. Order Durability (99.999%)
 
