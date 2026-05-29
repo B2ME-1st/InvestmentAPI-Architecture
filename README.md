@@ -50,48 +50,64 @@ To guarantee zero data loss and continuous availability for a high-volume stock 
 ## Design Justification
 
 ### Compute Design
-AWS Lambda (Ingress Layer):
 
-Justification: Chosen for instantaneous scaling and a zero-cost idle state during market closing hours and weekends. Its sole responsibility is basic payload validation, checking duplicate requests in Redis, dropping the event into Kafka, and returning an immediate HTTP 202 Accepted to the client.
+- **AWS Lambda (Ingress Layer):**
+    - *Justification:* Selected for its ability to scale instantly and incur zero cost when idle (e.g., during market closures). Lambda handles basic payload validation, checks for duplicate requests using Redis, submits events to Kafka, and returns an HTTP 202 Accepted response to clients.
 
-AWS ECS Fargate (Worker Microservice):
-
-Justification: Chosen to host the core execution logic. Serverless Lambda is poorly suited for persistent database connections; Fargate allows long-lived connection pooling to the database. By pulling from Kafka at a regulated pace, Fargate eliminates resource spikes, allowing us to provision a smaller, highly optimized compute footprint.
+- **AWS ECS Fargate (Worker Microservice):**
+    - *Justification:* Ideal for running the core execution logic, as it supports persistent database connections and efficient connection pooling—something Lambda cannot do well. Fargate consumes messages from Kafka at a controlled rate, preventing resource spikes and enabling a smaller, optimized compute footprint.
 
 ---
 
 ### Database Design
-Amazon Aurora PostgreSQL (Multi-AZ Cluster):
 
-Justification: Financial transactions mandate strict ACID compliance and relational integrity, ruling out NoSQL. Aurora PostgreSQL is chosen over standard RDS because it decouples compute from storage, allowing for independent scaling and replication speeds under 100ms.
+- **Amazon Aurora PostgreSQL (Multi-AZ Cluster):**
+    - *Justification:* Required for strict ACID compliance and relational integrity, which are essential for financial transactions. Aurora PostgreSQL is preferred over standard RDS due to its separation of compute and storage, enabling independent scaling and sub-100ms replication.
 
-Amazon ElastiCache for Redis (Shared Cache):
+- **Amazon ElastiCache for Redis (Shared Cache):**
+    - *Justification:* Used at the ingress layer to store client `idempotency_keys` with a 2-hour TTL. This ensures duplicate client requests are blocked at the edge, before reaching Kafka or the database, thereby safeguarding data integrity.
 
-Justification: Positioned at the ingress layer to store client idempotency_keys with a 2-hour TTL. This guarantees that duplicate network requests from clients are blocked instantly at the edge before hitting Kafka or the database, protecting data integrity.
-
----
-
-### Failover Strategy
-[Placeholder]
-
-Explain:
-- Multi-AZ deployment
-- Automatic failover approach
-- Recovery expectations
-- Service redundancy
-- Disaster recovery considerations
 
 ---
 
-### Backup & Recovery Strategy
-[Placeholder]
+## Failover Strategy
 
-Explain:
-- Backup frequency
-- Snapshot strategy
-- Retention policy
-- RPO/RTO targets
-- Restore testing approach
+### Multi-AZ Deployment
+All critical infrastructure components—including ECS Fargate compute, Apache Kafka brokers, and Aurora PostgreSQL—are deployed across three AWS Availability Zones (AZ-A, AZ-B, AZ-C) within the primary region. This ensures that the failure of a single data center does not impact overall service availability.
+
+### Automatic Failover Approach
+- **Compute/Ingress:** AWS API Gateway automatically reroutes traffic away from any failed AZ, ensuring requests are only sent to healthy Lambda and ECS Fargate instances.
+- **Database (Aurora):** Aurora automatically promotes a multi-AZ read replica to primary if the current writer fails, minimizing downtime.
+- **Queue (Kafka):** Kafka’s replication factor of 3 ensures that if a broker fails, a new partition leader is elected from a healthy AZ, maintaining message durability and availability.
+
+### Recovery Expectations
+- **Application Ingress:** Instantaneous traffic rerouting (0 seconds).
+- **Database Failover:** Replica promotion and DNS propagation occur in under 30 seconds.
+- **Data Loss:** Zero data loss during local failover, as Kafka requires confirmations from at least two AZs (`min.insync.replicas=2`) before acknowledging order ingestion.
+
+---
+
+## Backup & Recovery Strategy
+
+### Backup Frequency
+- **Continuous Backups:** Aurora is configured for automated, continuous backups with incremental transaction log recording.
+- **Daily Snapshots:** Full storage snapshots are taken every 24 hours during off-peak hours.
+
+### Snapshot Strategy
+- **Multi-layered Snapshots:** Daily automated snapshots are copied to an isolated, immutable AWS Backup vault in a separate backup-specific AWS account. This protects against accidental or malicious deletion in the primary account.
+
+### Retention Policy
+- **Continuous/PITR Data:** Retained for 35 days, enabling point-in-time recovery.
+- **Long-term Snapshots:** Retained for 7 years to meet financial compliance and regulatory requirements.
+- **Kafka Logs:** Message logs are retained for 7 days, allowing replay in case of downstream failures.
+
+### RPO/RTO Targets
+- **Recovery Point Objective (RPO):**
+    - Standard ingestion failover: 0 seconds (no data loss).
+    - Database point-in-time restore: <5 minutes (restore to the exact second before data corruption).
+- **Recovery Time Objective (RTO):**
+    - Standard ingestion failover: <30 seconds (automatic recovery from AZ loss).
+    - Database point-in-time restore: <2 hours (restore from backup and application repointing).
 
 ---
 
