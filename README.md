@@ -139,7 +139,7 @@ To survive a total AWS regional outage, an Aurora Global Database asynchronously
 ## Service Level Objectives
 
 For investments, **data correctness and consistency** (ACID compliance) trump raw speed. If a social media feed drops a post, it's fine; if an investment API drops a 20M Naira stock buy or duplicates it, _it's catastrophic_.
-Summary: You go explain tire (in court)
+> Summary: You go explain tire (in court)
 
 ### 1. Order Durability (99.999%)
 
