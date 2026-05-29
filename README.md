@@ -167,7 +167,7 @@ For investments, **data correctness and consistency** (ACID compliance) trump ra
 ---
 
 **Summary:**  
-We guarantee our doors are always open to accept your trade (**Availability**), and once you walk through the door, your trade cannot be lost (**Durability**).
+_We guarantee our doors are always open to accept your trade (**Availability**), and once you walk through the door, your trade cannot be lost (**Durability**)._
 
 
 ---
