@@ -82,7 +82,7 @@ To guarantee zero data loss and continuous availability for a high-volume stock 
 _The **API Gateway** plays a critical role in the scenario for a need to failover to a replica site_
 
 
-### Multi-AZ Deployment
+### Multi-AZ Deployment (ACTIVE-ACTIVE)
 All critical infrastructure components—including ECS Fargate compute, Apache Kafka brokers, and Aurora PostgreSQL—are deployed across three AWS Availability Zones (AZ-A, AZ-B, AZ-C) within the primary region. This ensures that the failure of a single data center does not impact overall service availability.
 
 ### Automatic Failover Approach
@@ -109,10 +109,10 @@ To survive a total AWS regional outage, an Aurora Global Database asynchronously
 ---
 
 ## Backup & Recovery Strategy
-
+### ACTIVE-PASSIVE
 > See the image below for the DR strategy
 
-<img width="1832" height="1337" alt="dr-strategy drawio" src="https://github.com/user-attachments/assets/35adec78-25d8-45c4-9dc3-d0b46fa818bc" />
+<img width="1832" height="1337" alt="dr-recovery drawio" src="https://github.com/user-attachments/assets/58ebc395-3441-4d51-b560-36bca4a06598" />
 
 
 
