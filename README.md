@@ -122,60 +122,39 @@ To survive a total AWS regional outage, an Aurora Global Database asynchronously
 
 ---
 
-## Service Level Objectives (SLOs)
 
-### Availability SLO
-[Placeholder]
+## Service Level Objectives
 
----
+For a critical investment microservice, **Order Durability** and **Availability** are the top priorities. These objectives embody the SRE ethos for financial systems: the service must always be available to accept investments, and it must never lose an order.
 
-### Latency SLO
-[Placeholder]
+### 1. Order Durability (99.999%)
 
----
+- **Goal:** Never lose a queued message.
+- **Implementation:** 
+    - Use high-availability storage such as multi-AZ Kafka replication and synchronous database commits.
+- **Rationale:** 
+    - Investors care more about the certainty of their ₦3M order being processed than about minor latency differences.
+- **Measurement:** 
+    - Metrics: `orders_ingested / orders_persisted_to_kafka`
+    - Monitoring: Grafana dashboard comparing generated order IDs to successfully queued IDs.
+    - **Alert:** Any drop below 99.999% triggers an alert.
 
-### Error Rate SLO
-[Placeholder]
+### 2. Ingestion Availability (99.95%)
 
----
-
-### Data Integrity SLO
-[Placeholder]
-
----
-
-## Observability & Alerting
-
-### Metrics & Monitoring
-[Placeholder]
-
-Describe:
-- Prometheus metrics collection
-- RED/USE metrics
-- Infrastructure metrics
-- Database metrics
+- **Goal:** Maximize API uptime.
+- **Implementation:** 
+    - Monitor HTTP metrics from AWS API Gateway or Lambda ingestion endpoints using Prometheus.
+- **Rationale:** 
+    - Slow responses are inconvenient, but downtime during market events is unacceptable.
+- **Measurement:** 
+    - Metrics: `(sum of 2xx and 3xx HTTP requests) / (total HTTP requests)`
+    - **Alert:** Any significant drop below 99.95% triggers an alert.
 
 ---
 
-### Dashboards
-[Placeholder]
+**Summary:**  
+We guarantee our doors are always open to accept your trade (**Availability**), and once you walk through the door, your trade cannot be lost (**Durability**).
 
-Describe:
-- Grafana dashboards
-- Business metrics
-- Infrastructure health views
-- Incident visibility dashboards
-
----
-
-### Alerting Strategy
-[Placeholder]
-
-Describe:
-- Prometheus alert rules
-- Alert severity levels
-- Escalation flow
-- On-call considerations
 
 ---
 
