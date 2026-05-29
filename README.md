@@ -72,6 +72,13 @@ To guarantee zero data loss and continuous availability for a high-volume stock 
 
 ## Failover Strategy
 
+> See the image below for the failover architecture diagram.
+<img width="1892" height="1328" alt="FAILOVER-ARCH drawio" src="https://github.com/user-attachments/assets/bc19058c-56e1-40b7-8908-ee26e4a45c7b" />
+
+
+_The **API Gateway** plays a critical role in the scenario for a need to failover to a replica site_
+
+
 ### Multi-AZ Deployment
 All critical infrastructure components—including ECS Fargate compute, Apache Kafka brokers, and Aurora PostgreSQL—are deployed across three AWS Availability Zones (AZ-A, AZ-B, AZ-C) within the primary region. This ensures that the failure of a single data center does not impact overall service availability.
 
