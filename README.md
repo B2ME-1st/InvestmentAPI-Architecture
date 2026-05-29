@@ -101,21 +101,18 @@ Failover: If AZ-A dies, Aurora automatically promotes one of the read replicas t
 ---
 
 ## Disaster Recovery (Across Different Regions)
-### Secondary Region: Europe (London)
-We will use an Active-Passive (Warm Standby) strategy in a secondary region, for the rare cases where the entire primary AWS Region goes offline
+### Secondary Region (ACTIVE-PASSIVE) 
+> See the image below for the DR strategy
+
+<img width="1832" height="1337" alt="dr-recovery drawio" src="https://github.com/user-attachments/assets/58ebc395-3441-4d51-b560-36bca4a06598" />
+
+We will use an **Active-Passive** (Warm Standby) strategy in a Europe London region, for the rare cases where the entire primary AWS Region goes offline
 
 To survive a total AWS regional outage, an Aurora Global Database asynchronously replicates data to a secondary DR region (RPO < 1 second). Infrastructure is defined via Terraform, but are scaled down to save costs and ready to scale up via a Route 53 DNS switch within 15 minutes (RTO < 15 mins).
 
 ---
 
 ## Backup & Recovery Strategy
-### ACTIVE-PASSIVE
-> See the image below for the DR strategy
-
-<img width="1832" height="1337" alt="dr-recovery drawio" src="https://github.com/user-attachments/assets/58ebc395-3441-4d51-b560-36bca4a06598" />
-
-
-
 ### Backup Frequency
 - **Continuous Backups:** Aurora is configured for automated, continuous backups with incremental transaction log recording.
 - **Daily Snapshots:** Full storage snapshots are taken every 24 hours during off-peak hours.
@@ -141,7 +138,7 @@ To survive a total AWS regional outage, an Aurora Global Database asynchronously
 
 ## Service Level Objectives
 
-For a critical investment microservice, **Order Durability** and **Availability** are the top priorities. These objectives embody the SRE ethos for financial systems: the service must always be available to accept investments, and it must never lose an order.
+For investments, **data correctness and consistency** (ACID compliance) trump raw speed. If a social media feed drops a post, it's fine; if an investment API drops a 20M Naira stock buy or duplicates it, _it's catastrophic_.
 
 ### 1. Order Durability (99.999%)
 
