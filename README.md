@@ -56,6 +56,9 @@ To guarantee zero data loss and continuous availability for a high-volume stock 
 
 - **AWS ECS Fargate (Worker Microservice):**
     - *Justification:* Ideal for running the core execution logic, as it supports persistent database connections and efficient connection pooling—something Lambda cannot do well. Fargate consumes messages from Kafka at a controlled rate, preventing resource spikes and enabling a smaller, optimized compute footprint.
+ 
+ - **Primary Region: Europe Ireland**
+    - *Justification:* This region was chosen due to it's low latency to Nigeria for various applications and use cases.
 
 ---
 
