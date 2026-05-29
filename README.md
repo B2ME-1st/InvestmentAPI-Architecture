@@ -45,44 +45,29 @@ To guarantee zero data loss and continuous availability for a high-volume stock 
 
 <img width="1637" height="977" alt="archi drawio" src="https://github.com/user-attachments/assets/5a9dd5d6-01db-4a27-b06e-8cc60511bb55" />
 
-
-### Infrastructure Components
-[Placeholder]
-
-Describe:
-- Compute layer
-- Networking
-- Load balancing
-- Database layer
-- Cache layer
-- Observability stack
-- Backup systems
-- CI/CD integration
-
 ---
 
 ## Design Justification
 
 ### Compute Design
-[Placeholder]
+AWS Lambda (Ingress Layer):
 
-Explain:
-- Choice of compute platform
-- Scaling approach
-- High availability considerations
-- Container orchestration decisions
+Justification: Chosen for instantaneous scaling and a zero-cost idle state during market closing hours and weekends. Its sole responsibility is basic payload validation, checking duplicate requests in Redis, dropping the event into Kafka, and returning an immediate HTTP 202 Accepted to the client.
+
+AWS ECS Fargate (Worker Microservice):
+
+Justification: Chosen to host the core execution logic. Serverless Lambda is poorly suited for persistent database connections; Fargate allows long-lived connection pooling to the database. By pulling from Kafka at a regulated pace, Fargate eliminates resource spikes, allowing us to provision a smaller, highly optimized compute footprint.
 
 ---
 
 ### Database Design
-[Placeholder]
+Amazon Aurora PostgreSQL (Multi-AZ Cluster):
 
-Explain:
-- Database choice
-- Replication strategy
-- Read/write considerations
-- Connection management
-- Data durability considerations
+Justification: Financial transactions mandate strict ACID compliance and relational integrity, ruling out NoSQL. Aurora PostgreSQL is chosen over standard RDS because it decouples compute from storage, allowing for independent scaling and replication speeds under 100ms.
+
+Amazon ElastiCache for Redis (Shared Cache):
+
+Justification: Positioned at the ingress layer to store client idempotency_keys with a 2-hour TTL. This guarantees that duplicate network requests from clients are blocked instantly at the edge before hitting Kafka or the database, protecting data integrity.
 
 ---
 
