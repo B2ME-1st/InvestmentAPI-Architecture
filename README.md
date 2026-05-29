@@ -76,14 +76,25 @@ To guarantee zero data loss and continuous availability for a high-volume stock 
 All critical infrastructure components—including ECS Fargate compute, Apache Kafka brokers, and Aurora PostgreSQL—are deployed across three AWS Availability Zones (AZ-A, AZ-B, AZ-C) within the primary region. This ensures that the failure of a single data center does not impact overall service availability.
 
 ### Automatic Failover Approach
-- **Compute/Ingress:** AWS API Gateway automatically reroutes traffic away from any failed AZ, ensuring requests are only sent to healthy Lambda and ECS Fargate instances.
-- **Database (Aurora):** Aurora automatically promotes a multi-AZ read replica to primary if the current writer fails, minimizing downtime.
+- **Compute/Ingress:** Inherently Multi-AZ. AWS handles the routing out of the box.
+- **ECS Fargate:** You configure your ECS Service to distribute tasks evenly across 3 private subnets (AZ-A, AZ-B, AZ-C). Fargate automatically scales up or down across these zones. If AZ-A fails, the Application Load Balancer / API Gateway shifts traffic entirely to AZ-B and AZ-C instantly.
+- **Database (Aurora):** You run an Aurora cluster with 1 Writer instance in AZ-A and 2 Read Replicas (one in AZ-B, one in AZ-C).
+Failover: If AZ-A dies, Aurora automatically promotes one of the read replicas to become the primary Writer in under 30 seconds. Your application layer handles this seamlessly using the Aurora cluster endpoint.
 - **Queue (Kafka):** Kafka’s replication factor of 3 ensures that if a broker fails, a new partition leader is elected from a healthy AZ, maintaining message durability and availability.
+- **Redis: ** Deploy AWS ElastiCache Redis in Cluster Mode across 3 AZs with automatic failover enabled.
 
 ### Recovery Expectations
 - **Application Ingress:** Instantaneous traffic rerouting (0 seconds).
 - **Database Failover:** Replica promotion and DNS propagation occur in under 30 seconds.
 - **Data Loss:** Zero data loss during local failover, as Kafka requires confirmations from at least two AZs (`min.insync.replicas=2`) before acknowledging order ingestion.
+
+---
+
+## Disaster Recovery (Across Different Regions)
+### Secondary Region: Europe (London)
+We will use an Active-Passive (Warm Standby) strategy in a secondary region, for the rare cases where the entire primary AWS Region goes offline
+
+To survive a total AWS regional outage, an Aurora Global Database asynchronously replicates data to a secondary DR region (RPO < 1 second). Infrastructure is defined via Terraform, but are scaled down to save costs and ready to scale up via a Route 53 DNS switch within 15 minutes (RTO < 15 mins).
 
 ---
 
