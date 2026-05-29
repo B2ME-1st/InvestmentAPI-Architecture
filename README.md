@@ -110,6 +110,12 @@ To survive a total AWS regional outage, an Aurora Global Database asynchronously
 
 ## Backup & Recovery Strategy
 
+> See the image below for the DR strategy
+
+<img width="1832" height="1337" alt="dr-strategy drawio" src="https://github.com/user-attachments/assets/35adec78-25d8-45c4-9dc3-d0b46fa818bc" />
+
+
+
 ### Backup Frequency
 - **Continuous Backups:** Aurora is configured for automated, continuous backups with incremental transaction log recording.
 - **Daily Snapshots:** Full storage snapshots are taken every 24 hours during off-peak hours.
